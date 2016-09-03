@@ -1,5 +1,5 @@
-FROM sameersbn/ubuntu:14.04.20160827
-MAINTAINER sameer@damagehead.com
+FROM oondeo/alpine
+MAINTAINER info@oondeo.es
 
 ENV GITLAB_CI_MULTI_RUNNER_VERSION=1.1.4 \
     GITLAB_CI_MULTI_RUNNER_USER=gitlab_ci_multi_runner \
