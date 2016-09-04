@@ -37,3 +37,5 @@ users:
     password: $KUBECFG_PASSWORD
 EOF
 fi
+
+spread deploy 

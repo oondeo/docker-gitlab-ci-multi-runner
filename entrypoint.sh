@@ -50,20 +50,22 @@ grant_access_to_docker_socket() {
 
 configure_ci_runner() {
   if [[ ! -e ${GITLAB_CI_MULTI_RUNNER_DATA_DIR}/config.toml ]]; then
-    if [[ -n ${CI_SERVER_URL} && -n ${RUNNER_TOKEN} && -n ${RUNNER_DESCRIPTION} && -n ${RUNNER_EXECUTOR} ]]; then
       if [[ ! -n ${RUNNER_TOKEN} ]]; then 
-        #wait until gitlab server is up    
-        sleep 60
-        LOCALTOKEN=`curl http://${CI_SERVER_URL}/api/v3/session --data "login=root&password=$GITLAB_ROOT_PASSWORD" | cut -d"," -f27 | cut -d ":" -f2 | cut -d "}" -f1`
-        export RUNNER_TOKEN=`curl "http://${CI_SERVER_URL}/admin/runners" --header "PRIVATE-TOKEN: $LOCALTOKEN" | grep runners-token | cut -d ">" -f2 | cut -d "<" -f1`          
+        #wait until gitlab server is up
+        sleep 120
+        if [[ ! -n ${GITLAB_ROOT_PASSWORD} ]]; then 
+            echo "Need root password or runner token"
+            exit 1
+        fi
+        export LOCALTOKEN=`curl "${GITLAB_SERVER_URL}/api/v3/session" --data "login=root&password=$GITLAB_ROOT_PASSWORD" | cut -d"," -f27 | cut -d ":" -f2 | cut -d "}" -f1 | cut -d'"' -f2`
+        export RUNNER_TOKEN=`curl "${GITLAB_SERVER_URL}/admin/runners" --header "PRIVATE-TOKEN: $LOCALTOKEN" | grep runners-token | cut -d ">" -f2 | cut -d "<" -f1`          
       fi
       sudo -HEu ${GITLAB_CI_MULTI_RUNNER_USER} \
         gitlab-ci-multi-runner register --config ${GITLAB_CI_MULTI_RUNNER_DATA_DIR}/config.toml \
-          -n -u "${CI_SERVER_URL}" -r "${RUNNER_TOKEN}" --name "${RUNNER_DESCRIPTION}" --executor "${RUNNER_EXECUTOR}"
-    else
+          -n -u "${GITLAB_SERVER_URL}/ci/" -r "${RUNNER_TOKEN}" --name "${RUNNER_DESCRIPTION}" --executor "${RUNNER_EXECUTOR}"
+  else
       sudo -HEu ${GITLAB_CI_MULTI_RUNNER_USER} \
         gitlab-ci-multi-runner register --config ${GITLAB_CI_MULTI_RUNNER_DATA_DIR}/config.toml
-    fi
   fi
 }
 
