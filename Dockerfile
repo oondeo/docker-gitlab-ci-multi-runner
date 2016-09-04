@@ -1,4 +1,4 @@
-FROM oondeo/alpine
+FROM sameersbn/ubuntu:14.04.20160827
 MAINTAINER info@oondeo.es
 
 ENV GITLAB_CI_MULTI_RUNNER_VERSION=1.1.4 \
