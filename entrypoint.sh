@@ -1,43 +1,6 @@
 #!/bin/bash
 set -e
 
-#---------------spread config-------------------
-# if config file does not exist produce one with env vars
-if [ ! -f ~/.kube/config ]; then
-    echo "setting up kubectl config"
-    mkdir -p ~/.kube
-
-    >~/.kube/config cat <<EOF
-kind: Config
-apiVersion: v1
-current-context: gitlab
-contexts:
-- name: gitlab
-  context:
-    cluster: default
-    user: default
-clusters:
-- name: default
-  cluster:
-    server: $KUBECFG_SERVER
-    api-version: $KUBECFG_API_VERSION
-    insecure-skip-tls-verify: $KUBECFG_INSECURE_SKIP_TLS_VERIFY
-    certificate-authority: $KUBECFG_CERTIFICATE_AUTHORITY
-    certificate-authority-data: $KUBECFG_CERTIFICATE_AUTHORITY_DATA
-
-users:
-- name: default
-  user:
-    client-certificate: $KUBECFG_CLIENT_CERTIFICATE
-    client-certificate-data: $KUBECFG_CLIENT_CERTIFICATE_DATA
-    client-key: $KUBECFG_CLIENT_KEY
-    client-key-data: $KUBECFG_CLIENT_KEY_DATA
-    token: $KUBECFG_TOKEN
-    username: $KUBECFG_USERNAME
-    password: $KUBECFG_PASSWORD
-EOF
-fi
-
 #-----------------------------------------------
 CA_CERTIFICATES_PATH=${CA_CERTIFICATES_PATH:-$GITLAB_CI_MULTI_RUNNER_DATA_DIR/certs/ca.crt}
 
@@ -89,6 +52,8 @@ configure_ci_runner() {
   if [[ ! -e ${GITLAB_CI_MULTI_RUNNER_DATA_DIR}/config.toml ]]; then
     if [[ -n ${CI_SERVER_URL} && -n ${RUNNER_TOKEN} && -n ${RUNNER_DESCRIPTION} && -n ${RUNNER_EXECUTOR} ]]; then
       if [[ ! -n ${RUNNER_TOKEN} ]]; then 
+        #wait until gitlab server is up    
+        sleep 60
         LOCALTOKEN=`curl http://${CI_SERVER_URL}/api/v3/session --data "login=root&password=$GITLAB_ROOT_PASSWORD" | cut -d"," -f27 | cut -d ":" -f2 | cut -d "}" -f1`
         export RUNNER_TOKEN=`curl "http://${CI_SERVER_URL}/admin/runners" --header "PRIVATE-TOKEN: $LOCALTOKEN" | grep runners-token | cut -d ">" -f2 | cut -d "<" -f1`          
       fi
