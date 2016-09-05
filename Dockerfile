@@ -24,7 +24,7 @@ RUN apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv E1DD270288B4E60
 COPY spread /usr/local/bin/spread
 COPY libgit2.so.23 /usr/local/lib/libgit2.so.23
 COPY entrypoint.sh /sbin/entrypoint.sh 
-RUN chmod 755 /sbin/entrypoint.sh && ln -s /usr/local/lib/libgit2.so /usr/local/lib/libgit2.so.23
+RUN chmod 755 /sbin/entrypoint.sh && ln -s /usr/local/lib/libgit2.so.23 /usr/local/lib/libgit2.so
 COPY spread.sh /usr/local/bin/spread.sh
 
 
