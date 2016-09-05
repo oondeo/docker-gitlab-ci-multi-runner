@@ -1,0 +1,6 @@
+staging:
+  type: deploy
+  script:
+  - spread deploy $CI_PROJECT_DIR
+  only:
+  - master
